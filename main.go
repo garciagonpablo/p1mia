@@ -30,12 +30,7 @@ func readInput() {
 		fmt.Println("No se reconoció el comando: ", err)
 		return
 	}
-
 	comando = strings.TrimSpace(comando)
-
-	//TODO: delte this line
-	fmt.Println(comando)
-
 	analize(comando)
 }
 
@@ -94,8 +89,59 @@ func analize(comando string) {
 				continue
 			} else if valor == "" {
 				continue
+			} else if valor[0] == '-'{
+				continue
+			}else if valor == "mount" {
+				fmt.Println("Ejecutando mount")
+			}else if valor == "unmount" {
+				fmt.Println("Ejecutando unmount")
+			}else if valor == "mkfs" {
+				fmt.Println("Ejecutando mkfs")
+			}else if valor == "login" {
+				fmt.Println("Ejecutando login")
+			}else if valor == "logout" {
+				fmt.Println("Ejecutando logout")
+			}else if valor == "mkgrp" {
+				fmt.Println("Ejectuando mkgrp")
+			}else if valor == "rmgrp" {
+				fmt.Println("Ejecutando rmgrp")
+			}else if valor == "mkusr" {
+				fmt.Println("Ejecutando mkusr")
+			}else if valor == "rmusr" {
+				fmt.Println("Ejecutando rmusr")
+			}else if valor == "mkfile" {
+				fmt.Println("Ejecutando mkfile")
+			}else if valor == "cat" {
+				fmt.Println("Ejecutando cat")
+			}else if valor == "remove" {
+				fmt.Println("Ejecutando remove")
+			}else if valor == "edit" {
+				fmt.Println("Ejecutando edit")
+			}else if valor == "rename" {
+				fmt.Println("Ejecutando rename")
+			}else if valor == "mkdir" {
+				fmt.Println("Ejecutando mkdir")
+			}else if valor == "copy" {
+				fmt.Println("Ejecutando copy")
+			}else if valor == "move" {
+				fmt.Println("Ejecutando move")
+			}else if valor == "find" {
+				fmt.Println("Ejecutando find")
+			}else if valor == "chown" {
+				fmt.Println("Ejecutando chown")
+			}else if valor == "chgrp" {
+				fmt.Println("Ejecutando chgrp")
+			}else if valor == "chmod" {
+				fmt.Println("Ejecutando chmod")
+			}else if valor == "pause" {
+				fmt.Println("Ejecutando pause")
+			}else if valor == "loss" {
+				fmt.Println("Ejecutando loss")
+			}else if valor == "execute" {
+				fmt.Println("Ejecutando execute")
 			} else {
 				fmt.Println("Comando No reconocido")
+				fmt.Println(valor)
 			}
 		}
 	}
@@ -113,7 +159,7 @@ func analizeMkdisk(comandoSeparado *[]string) {
 	//Iterar sobre el comando separado
 	for _, valor := range *comandoSeparado {
 		bandera := ObtenerBandera(valor)
-		banderaValor := ObtenerBanderaValor(valor)
+		banderaValor := ObtenerBanderaValor(valor)		
 		if bandera == "-size" {
 			size = true
 			sizeValor = banderaValor
@@ -159,6 +205,7 @@ func analizeMkdisk(comandoSeparado *[]string) {
 			}
 		}
 		//Pasar a entero el valor del size
+		fmt.Println(sizeValor)
 		sizeInt, err := strconv.Atoi(sizeValor)
 		if err != nil {
 			fmt.Println("El valor del parametro -size no es valido")
