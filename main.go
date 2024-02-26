@@ -1,6 +1,7 @@
 package main
 
 import (
+	"p1mia/fs"
 	"bufio"
 	"fmt"
 	"os"
@@ -35,14 +36,7 @@ func readInput() {
 }
 
 func analize(comando string) {
-	//mkdisk -size=3000 -unit=K login
-	//Mkdisk
-	//MKDISK
-	//login
-	//#inicio mkdisk del proyecto1
-
-	//var comando ----> comando := "Hola este es un comando" ----> cambio en memoria
-	//Apuntador al cambiar la variable, la cambia para todo el programa
+	
 	comandoSeparado := strings.Split(comando, " ")
 	if strings.Contains(comandoSeparado[0], "#") {
 		//Imprimir el comentario
@@ -204,8 +198,6 @@ func analizeMkdisk(comandoSeparado *[]string) {
 				return
 			}
 		}
-		//Pasar a entero el valor del size
-		fmt.Println(sizeValor)
 		sizeInt, err := strconv.Atoi(sizeValor)
 		if err != nil {
 			fmt.Println("El valor del parametro -size no es valido")
@@ -220,9 +212,8 @@ func analizeMkdisk(comandoSeparado *[]string) {
 		fmt.Println("Size: ", sizeValor)
 		fmt.Println("Fit: ", fitValor)
 		fmt.Println("Unit: ", unitValor)
-		//Llamar a la funcion para crear el disco
-		//CrearDisco(sizeInt, fitValor, unitValor)
-		// fs.CrearDisco(sizeInt, fitValor, unitValor)
+		
+		fs.CrearDisco(sizeInt, fitValor, unitValor)
 	}
 
 }
@@ -255,8 +246,7 @@ func analizeRmdisk(comandoSeparado *[]string) {
 		fmt.Println("Driveletter: ", driveletter)
 		//Llamar a la funcion para eliminar el disco
 		//Buscar el disco con la letra en el directorio Discos
-		//EliminarDisco(driveletter)
-		//os.Remove("Discos/" + driveletter + ".dsk")
+		os.Remove("MIA/P1/" + driveletter + ".dsk")
 	}
 }
 
