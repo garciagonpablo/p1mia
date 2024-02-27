@@ -76,7 +76,7 @@ func analize(comando string) {
 				analize(comandoSeparadoString)
 			} else if valor == "rep" {
 				fmt.Println("Ejecutando comando rep")
-				// fs.ReporteDisk(&comandoSeparado)
+				fs.ReporteDisk(&comandoSeparado)
 			} else if valor == "\n" {
 				continue
 			} else if valor == "\r" {
@@ -389,7 +389,7 @@ func analizeFdisk(comandoSeparado *[]string) {
 		fmt.Println("Delete: ", deleteValor)
 		fmt.Println("Add: ", addInt)
 		//Llamar a la funcion para crear la particion
-		// Filesystem.Fdisk(sizeInt, letterValor, nameValor, fitValor, unitValor, typeValor, deleteValor, addInt)
+		fs.Fdisk(sizeInt, letterValor, nameValor, fitValor, unitValor, typeValor, deleteValor, addInt)
 	}
 }
 
