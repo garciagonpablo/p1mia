@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	fs.BootMount()
 	fmt.Println("┌──────────────────────┐")
 	fmt.Println("│  GESTOR DE ARCHIVOS  │")
 	fmt.Println("├──────────────────────┤")
@@ -86,7 +87,7 @@ func analize(comando string) {
 			} else if valor[0] == '-'{
 				continue
 			}else if valor == "mount" {
-				fmt.Println("Ejecutando mount")
+				analizeMount(&comandoSeparado)
 			}else if valor == "unmount" {
 				fmt.Println("Ejecutando unmount")
 			}else if valor == "mkfs" {
@@ -390,6 +391,46 @@ func analizeFdisk(comandoSeparado *[]string) {
 		fmt.Println("Add: ", addInt)
 		//Llamar a la funcion para crear la particion
 		fs.Fdisk(sizeInt, letterValor, nameValor, fitValor, unitValor, typeValor, deleteValor, addInt)
+	}
+}
+func analizeMount(comandoSeparado *[]string) {
+	//mount -driveletter=A -name=Part1 #id=A118
+	*comandoSeparado = (*comandoSeparado)[1:]
+	//Booleanos para verificar si se ingresaron los parametros
+	var banderaLetter, banderaName bool
+	//Variables para almacenar los valores de los parametros
+	var letterValor, nameValor string
+	//Iterar sobre el comando separado
+	for _, valor := range *comandoSeparado {
+		bandera := ObtenerBandera(valor)
+		banderaValor := ObtenerBanderaValor(valor)
+		if bandera == "-driveletter" {
+			banderaLetter = true
+			letterValor = banderaValor
+			letterValor = strings.ToUpper(letterValor)
+			*comandoSeparado = (*comandoSeparado)[1:]
+		} else if bandera == "-name" {
+			banderaName = true
+			nameValor = banderaValor
+			*comandoSeparado = (*comandoSeparado)[1:]
+		} else {
+			fmt.Println("Parametro no reconocido: ", bandera)
+		}
+	}
+	//Obligatorios: -driveletter, -name
+	//Verificar si se ingresaron los parametros obligatorios
+	if !banderaLetter {
+		fmt.Println("El parametro -driveletter es obligatorio")
+		return
+	} else if !banderaName {
+		fmt.Println("El parametro -name es obligatorio")
+		return
+	} else {
+		//Imprimir los valores de los parametros
+		fmt.Println("Driveletter: ", letterValor)
+		fmt.Println("Name: ", nameValor)
+		//Llamar a la funcion para montar la particion
+		fs.MountPartition(letterValor, nameValor)
 	}
 }
 
