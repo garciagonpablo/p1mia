@@ -1,0 +1,4 @@
+#hoasdlfaslfas
+
+mkdisk -size=20
+rmdisk -driveletter=B

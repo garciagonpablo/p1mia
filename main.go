@@ -135,7 +135,7 @@ func analize(comando string) {
 			}else if valor == "loss" {
 				fmt.Println("Ejecutando loss")
 			}else if valor == "execute" {
-				fmt.Println("Ejecutando execute")
+				analizeExecute(&comandoSeparado)
 			} else {
 				fmt.Println("Comando No reconocido")
 				fmt.Println(valor)
@@ -574,9 +574,50 @@ func analizeLogin(comandoSeparado *[]string) {
 		fs.Login(userValor, passwordValor, idValor)
 	}
 }
+func analizeExecute(comandoSeparado *[]string){
+	*comandoSeparado = (*comandoSeparado)[1:]
+	var banderaPath bool
+	var pathValor string
+	//Iterar sobre el comando separado
+	for _, valor := range *comandoSeparado {
+		bandera := ObtenerBandera(valor)
+		banderaValor := ObtenerBanderaValor(valor)
+		if bandera == "-path" {
+			banderaPath = true
+			pathValor = banderaValor
+			*comandoSeparado = (*comandoSeparado)[1:]
+		} else {
+			fmt.Println("Parametro no reconocido: ", bandera)
+		}
+	}
+	if !banderaPath {
+		fmt.Println("El parametro -path es obligatorio")
+		return
+	} else {
+		fmt.Println("Starting exec in path: ", pathValor)
 
+		file, err := os.Open(pathValor)
+		if err != nil {
+			fmt.Println("Error opening the file: ",err)
+		}
+		defer file.Close()
+	
+		scanner := bufio.NewScanner(file)
+	
+		for scanner.Scan() {
+			line := scanner.Text()
+			fmt.Println(line)
+			analize(line)
+		}
+	
+		if err := scanner.Err(); err != nil {
+			fmt.Println("Error during scanning: ",err)
+		}		
+		fmt.Println("Ending execute . . .")
+
+	}
+}
 func ObtenerBandera(bandera string) string {
-	//mkdisk -size=3000 -unit=K
 	var banderaValor string
 	for _, valor := range bandera {
 		if valor == '=' {
