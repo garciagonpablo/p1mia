@@ -357,7 +357,7 @@ func MountPartition(letterValor string, nameValor string) {
 					contador++
 				}
 			}
-			particionMontada.Id = letterValor + strconv.Itoa(contador) + "45"
+			particionMontada.Id = letterValor + strconv.Itoa(contador) + "07"
 			particionMontada.Start = particion.Part_start
 			particionMontada.Size = particion.Part_size
 			//Agregar la particion montada
@@ -391,7 +391,7 @@ func MountPartition(letterValor string, nameValor string) {
 					contador++
 				}
 			}
-			particionMontada.Id = letterValor + strconv.Itoa(contador) + "45"
+			particionMontada.Id = letterValor + strconv.Itoa(contador) + "07"
 			particionMontada.Start = particion.Part_start
 			particionMontada.Size = particion.Part_size
 			//Agregar la particion montada
@@ -425,7 +425,7 @@ func MountPartition(letterValor string, nameValor string) {
 					contador++
 				}
 			}
-			particionMontada.Id = letterValor + strconv.Itoa(contador) + "45"
+			particionMontada.Id = letterValor + strconv.Itoa(contador) + "07"
 			particionMontada.Start = particion.Part_start
 			particionMontada.Size = particion.Part_size
 			//Agregar la particion montada
@@ -459,7 +459,7 @@ func MountPartition(letterValor string, nameValor string) {
 					contador++
 				}
 			}
-			particionMontada.Id = letterValor + strconv.Itoa(contador) + "45"
+			particionMontada.Id = letterValor + strconv.Itoa(contador) + "07"
 			particionMontada.Start = particion.Part_start
 			particionMontada.Size = particion.Part_size
 			//Agregar la particion montada
@@ -474,6 +474,18 @@ func MountPartition(letterValor string, nameValor string) {
 	} else {
 		fmt.Println("Error: La particion no existe")
 		return
+	}
+}
+func UnmountPartition(id string){
+	for i := 0; i < len(particionesMontadas); i++ {
+		if particionesMontadas[i].Id == id {
+			var newArr = make([]Mount, len(particionesMontadas)-1)
+			copy(newArr, particionesMontadas[:i])
+			copy(newArr[i:], particionesMontadas[i+1:])
+			particionesMontadas = newArr
+			fmt.Println("Unmounted partition: " + id)
+			break
+		}
 	}
 }
 func BootMount(){
@@ -498,19 +510,50 @@ func BootMount(){
 				return
 			}
 			var particionMontada Mount
-			particionMontada.LetterValor = string(letras[i])
-			particionMontada.Name = string(disk.Mbr_partition1.Part_name[:])
-			particionMontada.Part_type = disk.Mbr_partition1.Part_type
-			fmt.Println(string(letras[i]))
-			fmt.Println(string(disk.Mbr_partition1.Part_name[:]))
-			fmt.Println(string(disk.Mbr_partition1.Part_type[:]))
-
-
+			// Particion 1
+			if(string(disk.Mbr_partition1.Part_name[:])!="0000000000000000"){
+				particionMontada.Id = string(letras[i]) + strconv.Itoa(1) + "07"
+				particionMontada.LetterValor = string(letras[i])
+				particionMontada.Name = string(disk.Mbr_partition1.Part_name[:])
+				particionMontada.Part_type = disk.Mbr_partition1.Part_type
+				particionMontada.Start = disk.Mbr_partition1.Part_start
+				particionMontada.Size = disk.Mbr_partition1.Part_size
+				particionesMontadas = append(particionesMontadas, particionMontada)
+			}
+			// Particion 2
+			if(string(disk.Mbr_partition2.Part_name[:])!="0000000000000000"){
+				particionMontada.Id = string(letras[i]) + strconv.Itoa(2) + "07"
+				particionMontada.LetterValor = string(letras[i])
+				particionMontada.Name = string(disk.Mbr_partition2.Part_name[:])
+				particionMontada.Part_type = disk.Mbr_partition2.Part_type
+				particionMontada.Start = disk.Mbr_partition2.Part_start
+				particionMontada.Size = disk.Mbr_partition2.Part_size
+				particionesMontadas = append(particionesMontadas, particionMontada)
+			}
+			// Particion 3
+			if(string(disk.Mbr_partition3.Part_name[:])!="0000000000000000"){
+				particionMontada.Id = string(letras[i]) + strconv.Itoa(3) + "07"
+				particionMontada.LetterValor = string(letras[i])
+				particionMontada.Name = string(disk.Mbr_partition3.Part_name[:])
+				particionMontada.Part_type = disk.Mbr_partition3.Part_type
+				particionMontada.Start = disk.Mbr_partition3.Part_start
+				particionMontada.Size = disk.Mbr_partition3.Part_size
+				particionesMontadas = append(particionesMontadas, particionMontada)
+			}
+			// Particion 4
+			if(string(disk.Mbr_partition4.Part_name[:])!="0000000000000000"){
+				particionMontada.Id = string(letras[i]) + strconv.Itoa(4) + "07"
+				particionMontada.LetterValor = string(letras[i])
+				particionMontada.Name = string(disk.Mbr_partition4.Part_name[:])
+				particionMontada.Part_type = disk.Mbr_partition4.Part_type
+				particionMontada.Start = disk.Mbr_partition4.Part_start
+				particionMontada.Size = disk.Mbr_partition4.Part_size
+				particionesMontadas = append(particionesMontadas, particionMontada)
+			}
 			archivo.Close()
 		}
-
 	}else{
-		fmt.Println("No partitions disk to mount")
+		fmt.Println("No partitions disk to mount . . .")
 	}
-	fmt.Println(archivos)
+	fmt.Println("Partitions mounted . . .")
 }

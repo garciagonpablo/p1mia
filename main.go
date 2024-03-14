@@ -89,13 +89,15 @@ func analize(comando string) {
 			}else if valor == "mount" {
 				analizeMount(&comandoSeparado)
 			}else if valor == "unmount" {
-				fmt.Println("Ejecutando unmount")
+				analizeUnmount(&comandoSeparado)
 			}else if valor == "mkfs" {
+				analizeMkfs(&comandoSeparado)
 				fmt.Println("Ejecutando mkfs")
 			}else if valor == "login" {
+				analizeLogin(&comandoSeparado)
 				fmt.Println("Ejecutando login")
 			}else if valor == "logout" {
-				fmt.Println("Ejecutando logout")
+				fs.Logout()
 			}else if valor == "mkgrp" {
 				fmt.Println("Ejectuando mkgrp")
 			}else if valor == "rmgrp" {
@@ -431,6 +433,145 @@ func analizeMount(comandoSeparado *[]string) {
 		fmt.Println("Name: ", nameValor)
 		//Llamar a la funcion para montar la particion
 		fs.MountPartition(letterValor, nameValor)
+	}
+}
+func analizeUnmount(comandoSeparado *[]string) {
+	//mount -driveletter=A -name=Part1 #id=A118
+	*comandoSeparado = (*comandoSeparado)[1:]
+	//Booleanos para verificar si se ingresaron los parametros
+	var banderaId bool
+	//Variables para almacenar los valores de los parametros
+	var id string
+	//Iterar sobre el comando separado
+	for _, valor := range *comandoSeparado {
+		bandera := ObtenerBandera(valor)
+		banderaValor := ObtenerBanderaValor(valor)
+		if bandera == "-id" {
+			banderaId = true
+			id = banderaValor
+			id = strings.ToUpper(id)
+			*comandoSeparado = (*comandoSeparado)[1:]
+		} else {
+			fmt.Println("Parametro no reconocido: ", bandera)
+		}
+	}
+	//Obligatorios: -driveletter, -name
+	//Verificar si se ingresaron los parametros obligatorios
+	if !banderaId {
+		fmt.Println("El parametro -id es obligatorio")
+		return
+	}else {
+		fs.UnmountPartition(id)
+	}
+}
+func analizeMkfs(comandoSeparado *[]string) {
+	// mkfs -type=full -id=B145 -fs=3fs
+
+	*comandoSeparado = (*comandoSeparado)[1:]
+	//Booleanos para verificar si se ingresaron los parametros
+	var banderaType, banderaId, banderaFs bool
+	//Variables para almacenar los valores de los parametros
+	var typeValor, idValor, fsValor string
+	typeValor = "full"
+	fsValor = "2fs"
+	//Iterar sobre el comando separado
+	for _, valor := range *comandoSeparado {
+		bandera := ObtenerBandera(valor)
+		banderaValor := ObtenerBanderaValor(valor)
+		if bandera == "-type" {
+			banderaType = true
+			typeValor = banderaValor
+			typeValor = strings.ToLower(typeValor)
+			*comandoSeparado = (*comandoSeparado)[1:]
+		} else if bandera == "-id" {
+			banderaId = true
+			idValor = banderaValor
+			*comandoSeparado = (*comandoSeparado)[1:]
+		} else if bandera == "-fs" {
+			banderaFs = true
+			fsValor = banderaValor
+			fsValor = strings.ToLower(fsValor)
+			*comandoSeparado = (*comandoSeparado)[1:]
+		} else {
+			fmt.Println("Parametro no reconocido: ", bandera)
+		}
+	}
+	//Obligatorios: -id
+	//Verificar si se ingresaron los parametros obligatorios
+	if !banderaId {
+		fmt.Println("El parametro -id es obligatorio")
+		return
+	} else {
+		//Verificar si se ingresaron los parametros aceptados
+		if banderaType {
+			if typeValor != "full" {
+				fmt.Println("El valor del parametro -type no es valido")
+				return
+			}
+		}
+		if banderaFs {
+			if fsValor != "2fs" && fsValor != "3fs" {
+				fmt.Println("El valor del parametro -fs no es valido")
+				return
+			}
+		}
+		//Imprimir los valores de los parametros
+		fmt.Println("Type: ", typeValor)
+		fmt.Println("Id: ", idValor)
+		fmt.Println("Fs: ", fsValor)
+		//Llamar a la funcion para formatear la particion
+		fs.Mkfs(typeValor, idValor, fsValor)
+	}
+
+}
+
+func analizeLogin(comandoSeparado *[]string) {
+	//mount -driveletter=A -name=Part1 #id=A118
+	*comandoSeparado = (*comandoSeparado)[1:]
+	//Booleanos para verificar si se ingresaron los parametros
+	var banderaUser, banderaPassword, banderaId bool
+	//Variables para almacenar los valores de los parametros
+	var userValor, passwordValor, idValor string
+	//Iterar sobre el comando separado
+	for _, valor := range *comandoSeparado {
+		bandera := ObtenerBandera(valor)
+		banderaValor := ObtenerBanderaValor(valor)
+		if bandera == "-user" {
+			banderaUser = true
+			userValor = banderaValor
+			*comandoSeparado = (*comandoSeparado)[1:]
+		} else if bandera == "-pass" {
+			banderaPassword = true
+			passwordValor = banderaValor
+			*comandoSeparado = (*comandoSeparado)[1:]
+		} else if bandera == "-id" {
+			banderaId = true
+			idValor = banderaValor
+			*comandoSeparado = (*comandoSeparado)[1:]
+		} else {
+			fmt.Println("Parametro no reconocido: ", bandera)
+		}
+	}
+	//Obligatorios: -user, -pass, -id
+	//Verificar si se ingresaron los parametros obligatorios
+	if !banderaUser {
+		fmt.Println("El parametro -user es obligatorio")
+		return
+	}
+	if !banderaPassword {
+		fmt.Println("El parametro -pass es obligatorio")
+		return
+	}
+	if !banderaId {
+		fmt.Println("El parametro -id es obligatorio")
+		return
+	} else {
+		//Imprimir los valores de los parametros
+		fmt.Println("User: ", userValor)
+		fmt.Println("Password: ", passwordValor)
+		fmt.Println("Id: ", idValor)
+		//Llamar a la funcion para montar la particion
+		fs.Login(userValor, passwordValor, idValor)
 	}
 }
 
