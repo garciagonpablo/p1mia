@@ -245,6 +245,7 @@ func Fdisk(sizeValor int, letterValor string, nameValor string, fitValor string,
 			} else {
 				fmt.Println("Particion extendida creada con exito")
 			}
+			return
 		} else {
 			//Particion logica
 			//Verificar si hay particion extendida
@@ -300,6 +301,124 @@ func Fdisk(sizeValor int, letterValor string, nameValor string, fitValor string,
 			binary.Write(archivo, binary.LittleEndian, &ebrNueva)
 			archivo.Close()
 			fmt.Println("Particion logica creada con exito")
+			return
+		}
+	}
+	if addValor != 0 {
+		var wpartition Partition;
+		var partitionIndex = 0;
+		if string(disk.Mbr_partition1.Part_name[:]) == nameValor{
+			wpartition = disk.Mbr_partition1;
+			partitionIndex = 1;
+		}else if string(disk.Mbr_partition2.Part_name[:]) == nameValor{
+			wpartition = disk.Mbr_partition2;
+			partitionIndex = 2;
+		}else if string(disk.Mbr_partition3.Part_name[:]) == nameValor{
+			wpartition = disk.Mbr_partition3;
+			partitionIndex = 3;
+		}else if string(disk.Mbr_partition4.Part_name[:]) == nameValor{
+			wpartition = disk.Mbr_partition4;
+			partitionIndex = 4;
+		}else{
+			fmt.Println("No se encontró ninguna partición con el nombre: ",nameValor)
+			return
+		}
+		addAllowed := false;
+		if unitValor == "k" && addValor != 0 {
+			addValor = addValor * 1024
+		} else if unitValor == "m" && sizeValor != 0 {
+			addValor = addValor * 1024 * 1024
+		} else {
+			fmt.Println("El valor del parametro -unit no es valido")
+			return
+		}
+		if addValor>0{
+			part_end:=wpartition.Part_start+wpartition.Part_size;
+
+			if partitionIndex != 4{
+				valid_start :=checkNextStart(partitionIndex,disk)
+				if  valid_start>(part_end+int32(addValor)){
+					addAllowed = true;
+					if partitionIndex == 1{
+						disk.Mbr_partition1.Part_size = disk.Mbr_partition1.Part_size + +int32(addValor)
+					}else if partitionIndex == 2{
+						disk.Mbr_partition2.Part_size = disk.Mbr_partition2.Part_size + +int32(addValor)
+					}else if partitionIndex == 3{
+						disk.Mbr_partition3.Part_size = disk.Mbr_partition3.Part_size + +int32(addValor)
+					}
+				}
+			}else{
+				if disk.Mbr_tamano>(part_end+int32(addValor)){
+					addAllowed = true;
+					disk.Mbr_partition4.Part_size = disk.Mbr_partition4.Part_size +int32(addValor)
+				}
+			}
+			if !addAllowed {
+				fmt.Println("No ha sido posible agregar "+ string(addValor)+" a la partición: "+nameValor);
+				return
+			}
+		}else{
+			if partitionIndex == 1{
+				if disk.Mbr_partition1.Part_size>int32(addValor){
+					disk.Mbr_partition1.Part_size = disk.Mbr_partition1.Part_size+ int32(addValor)
+					addAllowed = true;
+				}
+			}else if partitionIndex == 2{
+				if disk.Mbr_partition2.Part_size>int32(addValor){
+					addAllowed = true;
+					disk.Mbr_partition2.Part_size = disk.Mbr_partition2.Part_size + int32(addValor)
+
+				}
+			}else if partitionIndex == 3{
+				if disk.Mbr_partition3.Part_size>int32(addValor){
+					addAllowed = true;
+					disk.Mbr_partition3.Part_size = disk.Mbr_partition3.Part_size + int32(addValor)
+
+				}
+			}else if partitionIndex == 4{
+				if disk.Mbr_partition4.Part_size>int32(addValor){
+					addAllowed = true;
+					disk.Mbr_partition4.Part_size = disk.Mbr_partition4.Part_size + int32(addValor)
+
+				}
+			}
+			if !addAllowed {
+				fmt.Println("No ha sido posible restar "+ string(addValor)+" a la partición: "+nameValor);
+			}
+		}
+		return
+	}
+	if deleteValor == "full"{
+		if string(disk.Mbr_partition1.Part_name[:]) == nameValor{
+			disk.Mbr_partition1.Part_status = [1]byte{'0'}
+			disk.Mbr_partition1.Part_type = [1]byte{'0'}
+			disk.Mbr_partition1.Part_fit = [1]byte{'0'}
+			disk.Mbr_partition1.Part_start = 0
+			disk.Mbr_partition1.Part_size = 0
+			disk.Mbr_partition1.Part_name = [16]byte{'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'}
+		}else if string(disk.Mbr_partition2.Part_name[:]) == nameValor{
+			disk.Mbr_partition2.Part_status = [1]byte{'0'}
+			disk.Mbr_partition2.Part_type = [1]byte{'0'}
+			disk.Mbr_partition2.Part_fit = [1]byte{'0'}
+			disk.Mbr_partition2.Part_start = 0
+			disk.Mbr_partition2.Part_size = 0
+			disk.Mbr_partition2.Part_name = [16]byte{'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'}
+		}else if string(disk.Mbr_partition3.Part_name[:]) == nameValor{
+			disk.Mbr_partition3.Part_status = [1]byte{'0'}
+			disk.Mbr_partition3.Part_type = [1]byte{'0'}
+			disk.Mbr_partition3.Part_fit = [1]byte{'0'}
+			disk.Mbr_partition3.Part_start = 0
+			disk.Mbr_partition3.Part_size = 0
+			disk.Mbr_partition3.Part_name = [16]byte{'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'}
+		}else if string(disk.Mbr_partition4.Part_name[:]) == nameValor{
+			disk.Mbr_partition4.Part_status = [1]byte{'0'}
+			disk.Mbr_partition4.Part_type = [1]byte{'0'}
+			disk.Mbr_partition4.Part_fit = [1]byte{'0'}
+			disk.Mbr_partition4.Part_start = 0
+			disk.Mbr_partition4.Part_size = 0
+			disk.Mbr_partition4.Part_name = [16]byte{'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'}
+		}else{
+			fmt.Println("No se logró borrar la particion por que no se encontró ninguna partición con el nombre: ",nameValor)
 			return
 		}
 	}
@@ -556,4 +675,14 @@ func BootMount(){
 		fmt.Println("No partitions disk to mount . . .")
 	}
 	fmt.Println("Partitions mounted . . .")
+}
+
+func checkNextStart(index int, mbr MBR)int32{
+	arrStart :=[4]int32{mbr.Mbr_partition1.Part_start,mbr.Mbr_partition2.Part_start,mbr.Mbr_partition3.Part_start,mbr.Mbr_partition4.Part_start}
+	for i := index; i < 4; i++ {
+		if arrStart[index] != 0{
+			return int32(index)
+		}
+	}
+	return 0
 }

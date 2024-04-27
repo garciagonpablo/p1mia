@@ -70,7 +70,7 @@ func Crear2FS(sb SuperBlock, MountActual Mount, n int) {
 	//Creación del super bloque
 	//Abrir el archivo
 
-	file, err := os.OpenFile("Discos/"+MountActual.LetterValor+".dsk", os.O_WRONLY, 0777)
+	file, err := os.OpenFile("MIA/P1/"+MountActual.LetterValor+".dsk", os.O_WRONLY, 0777)
 	if err != nil {
 		println("Error al abrir el archivo")
 		return
@@ -221,9 +221,9 @@ func Crear3FS(sb SuperBlock, MountActual Mount, n int) {
 
 	//Creación del superbloque
 	//Abrir el archivo
-	file, err := os.OpenFile("Discos/"+MountActual.LetterValor, os.O_WRONLY, 0777)
+	file, err := os.OpenFile("MIA/P1/"+MountActual.LetterValor+".dsk", os.O_WRONLY, 0777)
 	if err != nil {
-		println("Error al abrir el archivo")
+		println("Error al abrir el archivojaja")
 		return
 	}
 	defer file.Close()

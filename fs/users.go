@@ -26,7 +26,7 @@ func Login(userValor string, pwdValor string, idValor string) {
 	SuperBlock := NewSuperBlock()
 
 	//Leer el superbloque
-	file, err := os.OpenFile("Discos/"+MountActual.LetterValor+".dsk", os.O_RDWR, 0777)
+	file, err := os.OpenFile("MIA/P1/"+MountActual.LetterValor+".dsk", os.O_RDWR, 0777)
 	if err != nil {
 		fmt.Println("Error al leer el disco")
 		return

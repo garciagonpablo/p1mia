@@ -1,0 +1,32 @@
+digraph grid {
+    bgcolor="white"
+    label="Reporte MBR"
+    layout=dot
+    labelloc="t"
+    edge [weigth=1000 style=dashed color=red4 dir="both" arrowtail="open" arrowhead="open"]
+    a0[shape=none, color=black, label=<
+        <TABLE cellspacing="3" cellpadding="2" >
+            <TR><TD bgcolor="#7d00b3" colspan="2"><font color="white">Reporte de MBR</font></TD></TR>
+            <TR><TD bgcolor="lightgrey">mbr_tamano</TD><TD bgcolor="lightgrey" >42</TD></TR>
+            <TR><TD bgcolor="#e391f8">mbr_fecha_creacion</TD><TD bgcolor="#e391f8">1000</TD></TR>
+            <TR><TD bgcolor="lightgrey">mbr_disk_signature</TD><TD bgcolor="lightgrey">5000</TD></TR>
+
+            <TR><TD bgcolor="#7d00b3" colspan="2"> <font color="white">Particion</font></TD></TR>
+            <TR><TD bgcolor="lightgrey">part_status</TD><TD bgcolor="lightgrey">2500</TD></TR>
+            <TR><TD bgcolor="#e391f8">part_type</TD><TD bgcolor="#e391f8">750</TD></TR>
+            <TR><TD bgcolor="lightgrey">part_fit</TD><TD bgcolor="lightgrey" >example_time</TD></TR>
+            <TR><TD bgcolor="#e391f8">part_start</TD><TD bgcolor="#e391f8">example_umtime</TD></TR>
+            <TR><TD bgcolor="lightgrey">part_size</TD><TD bgcolor="lightgrey">3</TD></TR>
+            <TR><TD bgcolor="#e391f8">part_name</TD><TD bgcolor="#e391f8">1234</TD></TR>
+
+            <TR><TD bgcolor="#e90052" colspan="2"> <font color="white">Particion Logica</font></TD></TR>
+            <TR><TD bgcolor="lightgrey">part_status</TD><TD bgcolor="lightgrey">256</TD></TR>
+            <TR><TD bgcolor="#f57ca7">part_next</TD><TD bgcolor="#f57ca7">4096</TD></TR>
+            <TR><TD bgcolor="lightgrey">part_fit</TD><TD bgcolor="lightgrey">10</TD></TR>
+            <TR><TD bgcolor="#f57ca7">part_start</TD><TD bgcolor="#f57ca7">20</TD></TR>
+            <TR><TD bgcolor="lightgrey">part_size</TD><TD bgcolor="lightgrey">100</TD></TR>
+            <TR><TD bgcolor="#f57ca7">part_name</TD><TD bgcolor="#f57ca7">200</TD></TR>
+
+        </TABLE>
+    >];
+}

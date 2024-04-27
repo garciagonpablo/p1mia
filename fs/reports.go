@@ -6,19 +6,175 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"strings"
 	"strconv"
+	"strings"
 )
 
-func ReporteDisk(comandoSeparado *[]string) {
-	*comandoSeparado = (*comandoSeparado)[1:]
-	//Abrir el disco A
-	archivo, err := os.Open("MIA/P1/A.dsk")
+func ReporteMbr(idValor string, pathValor string){
+	fileName := path.Base(pathValor)
+	dirPath := strings.TrimSuffix(pathValor, fileName)
+	//Crear el directorio si no existe
+	err := os.MkdirAll(dirPath, 0777)
+	if err != nil {
+		fmt.Println("Error al crear el directorio: ", err)
+		return
+	}
+	//TODO: Caso de uso en el que las particiones no estén montadas. Creería yo que se deben de montar antes
+	// de acceder al reporte.
+	var foundMount = false
+	Particion := VerificarParticionMontada(idValor)
+	if Particion == -1 {
+		fmt.Println("No se encontro la particion montada con el ID: ", idValor)
+		return
+	}
+	MountActual := particionesMontadas[Particion]
+	archivo, err := os.OpenFile("MIA/P1/"+MountActual.LetterValor+".dsk", os.O_RDWR, 0777)
 	if err != nil {
 		fmt.Println("Error al abrir el disco: ", err)
 		return
 	}
 	defer archivo.Close()
+
+	disk := NewMBR()
+	archivo.Seek(int64(0), 0)
+	err = binary.Read(archivo, binary.LittleEndian, &disk)
+	if err != nil {
+		fmt.Println("Error al leer el MBR del disco: ", err)
+		return
+	}else{
+		foundMount = true
+	}
+	//sizeMBR := int(disk.Mbr_tamano)
+	//libre := int(disk.Mbr_tamano)
+	if foundMount{
+		Dot := "digraph grid {\nbgcolor=\"white\"\n label=\" Reporte MBR \"\nlayout=dot\n labelloc=\"t\"\n"
+		Dot += "edge [weigth=1000 style=dashed color=red4 dir=\"both\" arrowtail=\"open\" arrowhead=\"open\"]\n"
+		Dot += "a0[shape=none, color=black, label =<\n<TABLE cellspacing=\"3\" cellpadding=\"2\" >"
+		Dot += "<TR><TD bgcolor=\"#7d00b3\" colspan=\"2\"><font color=\"white\">Reporte de MBR</font></TD></TR>\n"
+		Dot += "<TR><TD bgcolor=\"lightgrey\">mbr_tamano</TD><TD bgcolor=\"lightgrey\" >"+strconv.Itoa(int(disk.Mbr_tamano))+"</TD></TR>\n"
+		Dot += "<TR><TD bgcolor=\"#e391f8\">mbr_fecha_creacion</TD><TD bgcolor=\"#e391f8\">"+string(disk.Mbr_fecha_creacion[:])+"</TD></TR>\n"
+		Dot += "<TR><TD bgcolor=\"lightgrey\">mbr_disk_signature</TD><TD bgcolor=\"lightgrey\">"+strconv.Itoa(int(disk.Mbr_disk_signature))+"</TD></TR>\n"
+		//TODO: HACERLAS PARA LAS PARTICIONES NORMALES Y LOGICAS
+		if disk.Mbr_partition1.Part_status != [1]byte{'0'}{
+			str := string(disk.Mbr_partition1.Part_name[:])
+			// Find the index of the first null character
+			nullIndex := -1
+			for i, char := range str {
+				if char == 0 {
+					nullIndex = i
+					break
+				}
+			}
+		
+			// If null characters are found, truncate the string
+			if nullIndex != -1 {
+				str = str[:nullIndex]
+			}
+
+			if disk.Mbr_partition1.Part_type == [1]byte{'p'} {
+
+				
+
+				Dot += "<TR><TD bgcolor=\"#7d00b3\" colspan=\"2\"><font color=\"white\">Particion</font></TD></TR>\n"
+				Dot += "<TR><TD bgcolor=\"lightgrey\">part_status</TD><TD bgcolor=\"lightgrey\">"+string(disk.Mbr_partition1.Part_status[:])+"</TD></TR>\n"
+				Dot += "<TR><TD bgcolor=\"#e391f8\">part_type</TD><TD bgcolor=\"#e391f8\">"+string(disk.Mbr_partition1.Part_type[:])+"</TD></TR>\n"
+				Dot += "<TR><TD bgcolor=\"lightgrey\">part_fit</TD><TD bgcolor=\"lightgrey\">"+string(disk.Mbr_partition1.Part_fit[:])+"</TD></TR>\n"
+				Dot += "<TR><TD bgcolor=\"#e391f8\">part_start</TD><TD bgcolor=\"#e391f8\">"+strconv.Itoa(int(disk.Mbr_partition1.Part_start))+"</TD></TR>\n"
+				Dot += "<TR><TD bgcolor=\"lightgrey\">part_size</TD><TD bgcolor=\"lightgrey\">"+strconv.Itoa(int(disk.Mbr_partition1.Part_size))+"</TD></TR>\n"
+				Dot += "<TR><TD bgcolor=\"#e391f8\">part_name</TD><TD bgcolor=\"#e391f8\">"+str+"</TD></TR>\n"
+				fmt.Println("Particion con error: ",string(disk.Mbr_partition1.Part_name[:]))
+			}else if disk.Mbr_partition1.Part_type == [1]byte{'e'}{
+				ebr := NewEBR()
+				TemporalDesplazamiento := int(disk.Mbr_partition1.Part_start)
+				for {
+					//Intentar leer el EBR
+					archivo.Seek(int64(TemporalDesplazamiento), 0)
+					binary.Read(archivo, binary.LittleEndian, &ebr)
+	
+					if ebr.Part_size != 0 {
+						Dot += "<TR><TD bgcolor=\"#e90052\" colspan=\"2\"><font color=\"white\">Particion Logica</font></TD></TR>\n"
+						Dot += "<TR><TD bgcolor=\"lightgrey\">part_mount</TD><TD bgcolor=\"lightgrey\">"+string(ebr.Part_mount[:])+"</TD></TR>\n"
+						Dot += "<TR><TD bgcolor=\"#f57ca7\">part_next</TD><TD bgcolor=\"#f57ca7\">"+strconv.Itoa(int(ebr.Part_next))+"</TD></TR>\n"
+						Dot += "<TR><TD bgcolor=\"lightgrey\">part_fit</TD><TD bgcolor=\"lightgrey\">"+string(ebr.Part_fit[:])+"</TD></TR>\n"
+						Dot += "<TR><TD bgcolor=\"#f57ca7\">part_start</TD><TD bgcolor=\"#f57ca7\">"+strconv.Itoa(int(ebr.Part_start))+"</TD></TR>\n"
+						Dot += "<TR><TD bgcolor=\"lightgrey\">part_size</TD><TD bgcolor=\"lightgrey\">"+strconv.Itoa(int(ebr.Part_size))+"</TD></TR>\n"
+						Dot += "<TR><TD bgcolor=\"#f57ca7\">part_name</TD><TD bgcolor=\"#f57ca7\">"+str+"</TD></TR>\n"
+						fmt.Println("Particion con error: ",string(ebr.Part_name[:]))
+						//Desplazar al siguiente EBR
+						TemporalDesplazamiento += int(ebr.Part_size) + 1 + binary.Size(EBR{})
+					}
+					if ebr.Part_next == 0 {
+						break
+					}
+				}
+			}else{ 
+				fmt.Println("logica")
+				//TODO leer el corrimiento del ebr para las lógicas
+				// Dot += "<TR><TD bgcolor=\"#e90052\" colspan=\"2\"><font color=\"white\">Particion Logica</font></TD></TR>"
+				// Dot += "<TR><TD bgcolor=\"lightgrey\">part_status</TD><TD bgcolor=\"lightgrey\">"+string(disk.Mbr_partition1.Part_status[:])+"</TD></TR>"
+				// Dot += "<TR><TD bgcolor=\"#f57ca7\">part_next</TD><TD bgcolor=\"#f57ca7\">4096</TD></TR>"
+				// Dot += "<TR><TD bgcolor=\"lightgrey\">part_fit</TD><TD bgcolor=\"lightgrey\">10</TD></TR>"
+				// Dot += "<TR><TD bgcolor=\"#f57ca7\">part_start</TD><TD bgcolor=\"#f57ca7\">20</TD></TR>"
+				// Dot += "<TR><TD bgcolor=\"lightgrey\">part_size</TD><TD bgcolor=\"lightgrey\">100</TD></TR>"
+				// Dot += "<TR><TD bgcolor=\"#f57ca7\">part_name</TD><TD bgcolor=\"#f57ca7\">200</TD></TR>"
+			}
+		}
+		Dot+="</TABLE>>];}"
+		//Quitar la extension al archivo (pdf, etc, )
+		//Crear el archivo .dot
+		DotName := "Reportes/"+idValor+"ReporteMBR.dot"
+		archivoDot, err := os.Create(DotName)
+		if err != nil {
+			fmt.Println("Error al crear el archivo .dot: ", err)
+			return
+		}
+		defer archivoDot.Close()
+		_, err = archivoDot.WriteString(Dot)
+		if err != nil {
+			fmt.Println("Error al escribir el archivo .dot: ", err)
+			return
+		}
+		//Generar la imagen
+		cmd := exec.Command("dot", "-T", "png", DotName, "-o", pathValor)
+		err = cmd.Run()
+		if err != nil {
+			fmt.Println("Error al generar la imagen: ", err)
+			return
+		}
+
+		fmt.Println("Reporte generado con exito")
+	}else{
+		fmt.Println("Reporte MBR: Mount not found")
+	}
+}
+
+func ReporteDisk(idValor string, pathValor string) {
+	//Abrir el disco A
+
+	fileName := path.Base(pathValor)
+	dirPath := strings.TrimSuffix(pathValor, fileName)
+	//Crear el directorio si no existe
+	err := os.MkdirAll(dirPath, 0777)
+	if err != nil {
+		fmt.Println("Error al crear el directorio: ", err)
+		return
+	}
+
+	//Buscar la particion montada con el ID
+	Particion := VerificarParticionMontada(idValor)
+	if Particion == -1 {
+		fmt.Println("No se encontro la particion montada con el ID: ", idValor)
+		return
+	}
+	MountActual := particionesMontadas[Particion]
+	//Abrir el disco
+	archivo, err := os.OpenFile("MIA/P1/"+MountActual.LetterValor+".dsk", os.O_RDWR, 0777)
+	if err != nil {
+		fmt.Println("Error al abrir el disco: ", err)
+		return
+	}
+	defer archivo.Close()
+
 	disk := NewMBR()
 	archivo.Seek(int64(0), 0)
 	err = binary.Read(archivo, binary.LittleEndian, &disk)
@@ -260,6 +416,7 @@ func ReporteDisk(comandoSeparado *[]string) {
 	}
 	Dot += "\"];\n}"
 
+	//Quitar la extension al archivo (pdf, etc, )
 	//Crear el archivo .dot
 	DotName := "Reportes/ReporteDisk.dot"
 	archivoDot, err := os.Create(DotName)
@@ -274,7 +431,7 @@ func ReporteDisk(comandoSeparado *[]string) {
 		return
 	}
 	//Generar la imagen
-	cmd := exec.Command("dot", "-T", "png", DotName, "-o", "Reportes/ReporteDisk.png")
+	cmd := exec.Command("dot", "-T", "png", DotName, "-o", pathValor)
 	err = cmd.Run()
 	if err != nil {
 		fmt.Println("Error al generar la imagen: ", err)
@@ -284,12 +441,13 @@ func ReporteDisk(comandoSeparado *[]string) {
 	fmt.Println("Reporte generado con exito")
 
 }
+
 func RepTree(idValor string, pathValor string) {
 	//Crear el directorio si no existe
 	fileName := path.Base(pathValor)
 	dirPath := strings.TrimSuffix(pathValor, fileName)
 	//Crear el directorio si no existe
-	err := os.MkdirAll(dirPath, 0664)
+	err := os.MkdirAll(dirPath, 0777)
 	if err != nil {
 		fmt.Println("Error al crear el directorio: ", err)
 		return
@@ -303,7 +461,7 @@ func RepTree(idValor string, pathValor string) {
 	}
 	MountActual := particionesMontadas[Particion]
 	//Abrir el disco
-	archivo, err := os.OpenFile("Discos/"+MountActual.LetterValor+".dsk", os.O_RDWR, 0664)
+	archivo, err := os.OpenFile("MIA/P1/"+MountActual.LetterValor+".dsk", os.O_RDWR, 0777)
 	if err != nil {
 		fmt.Println("Error al abrir el disco: ", err)
 		return
@@ -452,7 +610,7 @@ func ReporteSB(idValor string, pathValor string) {
 	fileName := path.Base(pathValor)
 	dirPath := strings.TrimSuffix(pathValor, fileName)
 	//Crear el directorio si no existe
-	err := os.MkdirAll(dirPath, 0664)
+	err := os.MkdirAll(dirPath, 0777)
 	if err != nil {
 		fmt.Println("Error al crear el directorio: ", err)
 		return
@@ -466,7 +624,7 @@ func ReporteSB(idValor string, pathValor string) {
 	}
 	MountActual := particionesMontadas[Particion]
 	//Abrir el disco
-	archivo, err := os.OpenFile("Discos/"+MountActual.LetterValor+".dsk", os.O_RDWR, 0664)
+	archivo, err := os.OpenFile("MIA/P1/"+MountActual.LetterValor+".dsk", os.O_RDWR, 0777)
 	if err != nil {
 		fmt.Println("Error al abrir el disco: ", err)
 		return

@@ -1,0 +1,43 @@
+#ENTRADA SEGUNDA PARTE MIA
+#Seccion A - Sergie Arizandieta
+#1S 2024
+#CAMBIAR /home/pablo -> POR SU USUARIO EJ ->  /home/SU_USER 
+#CAMBIAR LOS IDS
+
+#CREACION DE DISCOS------------------------------------------------
+Mkdisk -size=20 -unit=m
+Mkdisk -size=20 -unit=m
+
+#CREACION DE PARTICION------------------------------------------------
+fdisk -type=P -unit=K -name=Part1 -size=7680 -driveletter=A -fit=BF
+fdisk -type=P -unit=K -name=Part1 -size=7680 -driveletter=B -fit=BF
+
+#MOUNT------------------------------------------------
+mount -driveletter=A -name=Part1 #A107 -> id1 -> cambiar el A107 por el ID que a ustedes les genera
+mount -driveletter=B -name=Part1 #B107 -> id2 -> cambiar el B107 por el ID que a ustedes les genera
+
+#CREACION DE SISTEMA DE ARCHIVOS------------------------------------------------
+mkfs -type=full -id=A107 -fs=2fs
+mkfs -type=full -id=B107 -fs=3fs
+pause
+#EXT2------------------------------------------------
+#------------------------REPORTES 1----------------
+rep -id=A107 -path=/home/pablo/archivos/reportes/reporte1_sb.jpg -name=sb
+rep -id=A107 -path=/home/pablo/archivos/reportes/reporte1_tree.jpg -name=tree
+
+pause
+
+#LOGIN------------------------------------------------
+login -user=root -pass=123 -id=A107
+
+login -user=root -pass=123 -id=A107 #ERR SESION INICIADA
+
+pause
+
+
+
+
+logout
+logout #ERR NO HAY SESION INICIADA
+
+

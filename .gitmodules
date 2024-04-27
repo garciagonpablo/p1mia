@@ -1,0 +1,3 @@
+[submodule "p2mia"]
+	path = p2mia
+	url = git@github.com:garciagonpablo/p2mia.git
